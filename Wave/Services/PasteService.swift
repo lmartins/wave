@@ -63,6 +63,10 @@ struct PasteService {
         }
         let savedChangeCount = pasteboard.changeCount
 
+        // Brief pre-delay so the user's held hotkey modifier doesn't collide with
+        // the synthetic Cmd+C (Electron/JVM apps read hardware modifier state directly).
+        try? await Task.sleep(for: .milliseconds(20))
+
         // Simulate Cmd+C — works in every app (browsers, Electron, Terminal)
         let src = CGEventSource(stateID: .hidSystemState)
         let cKey = CGKeyCode(kVK_ANSI_C)
@@ -73,8 +77,14 @@ struct PasteService {
         down?.post(tap: .cghidEventTap)
         up?.post(tap: .cghidEventTap)
 
-        // Suspend (not block) until clipboard is updated
-        try? await Task.sleep(for: .milliseconds(80))
+        // Poll the pasteboard up to ~300ms instead of a fixed sleep —
+        // JVM/Electron apps can take 100–250ms to land on the system pasteboard.
+        let pollStart = Date()
+        let pollTimeout: TimeInterval = 0.3
+        while pasteboard.changeCount == savedChangeCount,
+              Date().timeIntervalSince(pollStart) < pollTimeout {
+            try? await Task.sleep(for: .milliseconds(15))
+        }
 
         // Only read if the clipboard actually changed (i.e. something was selected)
         let text: String?
