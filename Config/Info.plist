@@ -28,5 +28,13 @@
 	<string>AccentColor</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Wave needs microphone access to record speech for transcription.</string>
+	<key>SUFeedURL</key>
+	<string>https://mxvsh.github.io/wave/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>K0yJPvXnOPfoG18bP57X24M05PnY70jlj6NqK76CikE=</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUAutomaticallyUpdate</key>
+	<true/>
 </dict>
 </plist>
