@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.1](https://github.com/mxvsh/wave/compare/v0.4.0...v0.4.1) (2026-04-19)
+
+### Bug Fixes
+
+* poll pasteboard and pre-delay for reliable text selection in IDEs ([268ad0a](https://github.com/mxvsh/wave/commit/268ad0a22439c6ac7729f89d77dee85bdf3f0374))
+
 ## [0.4.0](https://github.com/mxvsh/wave/compare/v0.3.8...v0.4.0) (2026-04-19)
 
 ### Features
