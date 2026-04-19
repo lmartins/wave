@@ -202,16 +202,26 @@ final class AppState {
             microphoneManager.applySelection(uid: selectedMicUID)
         }
 
-        // Default shortcut: Fn
+        // Default shortcut: Fn (debug uses Right Shift to avoid conflicting with prod)
         if hotkeyKeyCode == 0 && hotkeyModifiers == 0 {
+            #if DEBUG
+            hotkeyKeyCode = 60 // kVK_RightShift
+            hotkeyModifiers = CGEventFlags.maskShift.rawValue
+            #else
             hotkeyKeyCode = 63 // kVK_Function
             hotkeyModifiers = CGEventFlags.maskSecondaryFn.rawValue
+            #endif
         }
 
-        // Default AI shortcut: Right Option
+        // Default AI shortcut: Right Option (debug uses Right Control)
         if aiModeKeyCode == 0 && aiModeModifiers == 0 {
+            #if DEBUG
+            aiModeKeyCode = 62 // kVK_RightControl
+            aiModeModifiers = CGEventFlags.maskControl.rawValue
+            #else
             aiModeKeyCode = 61 // kVK_RightOption
             aiModeModifiers = CGEventFlags.maskAlternate.rawValue
+            #endif
         }
 
         if !isOnboardingComplete {
@@ -290,18 +300,21 @@ final class AppState {
             DispatchQueue.main.async {
                 guard let self = self else { return }
                 self.isAIMode = true
-                self.selectedContext = PasteService.getSelectedText()
-                switch self.dictationMode {
-                case .pushToTalk:
-                    if self.status == .idle {
-                        self.isKeyHeld = true
-                        Task { await self.startDictation() }
-                    }
-                case .toggle:
-                    if self.status == .idle {
-                        Task { await self.startDictation() }
-                    } else if self.status == .recording {
-                        Task { await self.stopDictationAndPaste() }
+                Task { @MainActor [weak self] in
+                    guard let self = self else { return }
+                    self.selectedContext = await PasteService.getSelectedText()
+                    switch self.dictationMode {
+                    case .pushToTalk:
+                        if self.status == .idle {
+                            self.isKeyHeld = true
+                            await self.startDictation()
+                        }
+                    case .toggle:
+                        if self.status == .idle {
+                            await self.startDictation()
+                        } else if self.status == .recording {
+                            await self.stopDictationAndPaste()
+                        }
                     }
                 }
             }

@@ -1,5 +1,4 @@
 import AppKit
-import ApplicationServices
 import Carbon.HIToolbox
 
 struct PasteService {
@@ -49,14 +48,51 @@ struct PasteService {
         }
     }
 
-    static func getSelectedText() -> String? {
-        let systemWide = AXUIElementCreateSystemWide()
-        var focusedElement: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(systemWide, kAXFocusedUIElementAttribute as CFString, &focusedElement) == .success,
-              let element = focusedElement else { return nil }
-        var value: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(element as! AXUIElement, kAXSelectedTextAttribute as CFString, &value) == .success,
-              let text = value as? String, !text.isEmpty else { return nil }
-        return text
+    @MainActor
+    static func getSelectedText() async -> String? {
+        let pasteboard = NSPasteboard.general
+
+        // Save current clipboard state
+        let savedItems = pasteboard.pasteboardItems?.compactMap { item -> [NSPasteboard.PasteboardType: Data]? in
+            var dataMap: [NSPasteboard.PasteboardType: Data] = [:]
+            for type in item.types {
+                if let data = item.data(forType: type) { dataMap[type] = data }
+            }
+            return dataMap.isEmpty ? nil : dataMap
+        }
+        let savedChangeCount = pasteboard.changeCount
+
+        // Simulate Cmd+C — works in every app (browsers, Electron, Terminal)
+        let src = CGEventSource(stateID: .hidSystemState)
+        let cKey = CGKeyCode(kVK_ANSI_C)
+        let down = CGEvent(keyboardEventSource: src, virtualKey: cKey, keyDown: true)
+        let up   = CGEvent(keyboardEventSource: src, virtualKey: cKey, keyDown: false)
+        down?.flags = .maskCommand
+        up?.flags   = .maskCommand
+        down?.post(tap: .cghidEventTap)
+        up?.post(tap: .cghidEventTap)
+
+        // Suspend (not block) until clipboard is updated
+        try? await Task.sleep(for: .milliseconds(80))
+
+        // Only read if the clipboard actually changed (i.e. something was selected)
+        let text: String?
+        if pasteboard.changeCount != savedChangeCount {
+            text = pasteboard.string(forType: .string)
+        } else {
+            text = nil
+        }
+
+        // Restore original clipboard
+        pasteboard.clearContents()
+        if let items = savedItems, !items.isEmpty {
+            for dataMap in items {
+                let newItem = NSPasteboardItem()
+                for (type, data) in dataMap { newItem.setData(data, forType: type) }
+                pasteboard.writeObjects([newItem])
+            }
+        }
+
+        return text?.isEmpty == false ? text : nil
     }
 }
