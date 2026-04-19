@@ -362,6 +362,9 @@ final class AppState {
             return
         }
 
+        // Dismiss any visible answer card before starting a new session
+        overlayPanel?.hideAnswer()
+
         do {
             status = .recording
             showOverlay()
@@ -435,20 +438,49 @@ final class AppState {
 
         status = .idle
         overlayPanel?.setAIMode(false)
+        let wasAIMode = isAIMode
+        let hadSelection = selectedContext != nil
         isAIMode = false
         selectedContext = nil
         hideOverlayIfIdle()
 
         if let text = text, !text.isEmpty {
-            print("[wave] pasting: '\(text)'")
             historyManager.add(text)
-            try? await Task.sleep(for: .milliseconds(100))
-            PasteService.paste(text: text)
+
+            // Route:
+            // - Regular dictation → always paste
+            // - AI mode: paste only if there's an editable field to paste into.
+            //   Otherwise (reading webpage, PDF, etc.), show the answer card.
+            //   Selected text is just context for the LLM, not a routing signal.
+            let shouldShowCard = wasAIMode && !PasteService.hasEditableFocus()
+
+            if shouldShowCard {
+                print("[wave] showing answer card: '\(text)'")
+                overlayPanel?.showAnswer(
+                    text,
+                    onCopy: { [weak self] in
+                        self?.copyAnswerToClipboard(text)
+                    },
+                    onClose: { [weak self] in
+                        self?.overlayPanel?.hideAnswer()
+                    }
+                )
+            } else {
+                print("[wave] pasting: '\(text)' (hadSelection=\(hadSelection))")
+                try? await Task.sleep(for: .milliseconds(100))
+                PasteService.paste(text: text)
+            }
         } else {
             print("[wave] nothing to paste")
         }
 
         status = .idle
+    }
+
+    private func copyAnswerToClipboard(_ text: String) {
+        let pb = NSPasteboard.general
+        pb.clearContents()
+        pb.setString(text, forType: .string)
     }
 
     func verifyAndFetchGroqModels() async {

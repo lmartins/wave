@@ -1,4 +1,5 @@
 import AppKit
+import ApplicationServices
 import Carbon.HIToolbox
 
 struct PasteService {
@@ -94,5 +95,33 @@ struct PasteService {
         }
 
         return text?.isEmpty == false ? text : nil
+    }
+
+    /// Returns true if the focused UI element accepts text input
+    /// (e.g. user has cursor in a text field, text area, search bar).
+    static func hasEditableFocus() -> Bool {
+        let systemWide = AXUIElementCreateSystemWide()
+        var focusedElement: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(systemWide, kAXFocusedUIElementAttribute as CFString, &focusedElement) == .success,
+              let element = focusedElement else { return false }
+        let axElement = element as! AXUIElement
+
+        // Primary signal: role suggests an editable field
+        var role: CFTypeRef?
+        if AXUIElementCopyAttributeValue(axElement, kAXRoleAttribute as CFString, &role) == .success,
+           let roleString = role as? String {
+            let editableRoles: Set<String> = [
+                "AXTextField",
+                "AXTextArea",
+                "AXComboBox",
+                "AXSearchField",
+            ]
+            if editableRoles.contains(roleString) { return true }
+        }
+
+        // Fallback: element lets us set its value (works for some browser inputs)
+        var settable: DarwinBoolean = false
+        AXUIElementIsAttributeSettable(axElement, kAXValueAttribute as CFString, &settable)
+        return settable.boolValue
     }
 }

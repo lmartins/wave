@@ -79,11 +79,7 @@ struct WaveApp: App {
 
             Button("Settings...") {
                 appState.pendingNavSelection = .general
-                openWindow(id: "main")
-                NSApp.activate(ignoringOtherApps: true)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                    NSApp.activate(ignoringOtherApps: true)
-                }
+                openMainWindow()
             }
             .keyboardShortcut(",", modifiers: .command)
 
@@ -97,6 +93,27 @@ struct WaveApp: App {
             Image("MenuBarIcon")
                 .renderingMode(.template)
         }
+    }
+
+    /// Reliably shows the main window from MenuBarExtra.
+    /// Works around SwiftUI `Window` scene + `openWindow(id:)` re-open bugs
+    /// by finding and re-showing an existing window via AppKit first,
+    /// falling back to `openWindow` only for the very first launch.
+    private func openMainWindow() {
+        // Find an existing window for the main scene (may be hidden/closed)
+        let existing = NSApp.windows.first { window in
+            // SwiftUI-created window titles match the Scene title; also check identifier
+            window.title == "Wave" || window.identifier?.rawValue.contains("main") == true
+        }
+
+        if let window = existing {
+            if window.isMiniaturized { window.deminiaturize(nil) }
+            window.makeKeyAndOrderFront(nil)
+        } else {
+            openWindow(id: "main")
+        }
+
+        NSApp.activate(ignoringOtherApps: true)
     }
 }
 

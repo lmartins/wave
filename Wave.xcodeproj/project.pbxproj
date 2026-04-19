@@ -184,6 +184,23 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		3CA5A78D2F5063F600DBB766 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7B4E00082F60000000DBB766 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXShellScriptBuildPhase section */
 		7B4E000C2F60000000DBB766 /* Generate whisper dSYM */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -207,23 +224,6 @@
 			shellScript = "if [ \"$CONFIGURATION\" != \"AppStore\" ]; then\n  exit 0\nfi\n\nFRAMEWORK_BINARY=\"$TARGET_BUILD_DIR/$FRAMEWORKS_FOLDER_PATH/whisper.framework/Versions/A/whisper\"\nFRAMEWORK_DSYM=\"$DWARF_DSYM_FOLDER_PATH/whisper.framework.dSYM\"\n\nif [ ! -f \"$FRAMEWORK_BINARY\" ]; then\n  echo \"whisper.framework binary not found at $FRAMEWORK_BINARY\"\n  exit 1\nfi\n\nrm -rf \"$FRAMEWORK_DSYM\"\ndsymutil \"$FRAMEWORK_BINARY\" -o \"$FRAMEWORK_DSYM\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
-
-/* Begin PBXResourcesBuildPhase section */
-		3CA5A78D2F5063F600DBB766 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7B4E00082F60000000DBB766 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		3CA5A78B2F5063F600DBB766 /* Sources */ = {

@@ -1,5 +1,6 @@
 import AppKit
 import QuartzCore
+import SwiftUI
 
 // Idle: tiny pill. Active: expanded wave container.
 private let kIdleW:    CGFloat = 44
@@ -221,6 +222,8 @@ final class OverlayPanel: NSPanel {
     private var baseCenterX: CGFloat = 0
     private var shortcutLabel: String = ""
     private var tooltipTimer: Timer?
+    private var answerHost: NSHostingView<AnswerCardView>?
+    private(set) var isShowingAnswer = false
 
     var onMouseDown: (() -> Void)? {
         get { drawView.onMouseDown }
@@ -272,6 +275,9 @@ final class OverlayPanel: NSPanel {
     }
 
     func updateStatus(_ status: AppStatus) {
+        // Don't overwrite the card while it's showing
+        if isShowingAnswer { return }
+
         drawView.status = status
 
         if !isVisible {
@@ -297,7 +303,9 @@ final class OverlayPanel: NSPanel {
         let targetFrame = NSRect(x: baseCenterX - w / 2, y: baseY, width: w, height: h)
 
         DispatchQueue.main.async { [weak self] in
-            self?.setFrame(targetFrame, display: true, animate: true)
+            // Re-check — the answer card may have taken over in the meantime
+            guard let self, !self.isShowingAnswer else { return }
+            self.setFrame(targetFrame, display: true, animate: true)
         }
     }
 
@@ -329,6 +337,61 @@ final class OverlayPanel: NSPanel {
         drawView.isAIMode = enabled
     }
 
+    // MARK: - Answer card morph
+
+    func showAnswer(_ text: String, onCopy: @escaping () -> Void, onClose: @escaping () -> Void) {
+        // Dismiss tooltip if visible
+        tooltipTimer?.invalidate()
+        tooltipTimer = nil
+        tooltipPanel.hide()
+
+        // Make sure baseCenterX/baseY are current
+        if baseCenterX == 0 { positionOnScreen() }
+
+        let card = AnswerCardView(text: text, onCopy: onCopy, onClose: onClose)
+        let host = NSHostingView(rootView: card)
+
+        // Force SwiftUI to lay out and compute an honest intrinsic size
+        host.layoutSubtreeIfNeeded()
+        let fitSize = host.fittingSize
+        let cardW: CGFloat = max(360, fitSize.width)
+        let cardH: CGFloat = min(320, max(90, fitSize.height))
+        host.frame = NSRect(x: 0, y: 0, width: cardW, height: cardH)
+
+        contentView = host
+        answerHost = host
+        isShowingAnswer = true
+        ignoresMouseEvents = false
+
+        // Anchor bottom-center; grow upward from pill's base Y
+        let targetFrame = NSRect(
+            x: baseCenterX - cardW / 2,
+            y: baseY,
+            width: cardW,
+            height: cardH
+        )
+        if !isVisible { orderFrontRegardless() }
+        setFrame(targetFrame, display: true, animate: true)
+    }
+
+    func hideAnswer() {
+        guard isShowingAnswer else { return }
+        isShowingAnswer = false
+        answerHost = nil
+
+        drawView.frame = NSRect(x: 0, y: 0, width: kIdleW, height: kIdleH)
+        drawView.alphaValue = 1
+        contentView = drawView
+
+        let targetFrame = NSRect(
+            x: baseCenterX - kIdleW / 2,
+            y: baseY,
+            width: kIdleW,
+            height: kIdleH
+        )
+        setFrame(targetFrame, display: true)
+    }
+
     @objc private func screenDidChange() { positionOnScreen() }
 
     private func positionOnScreen() {
@@ -340,6 +403,14 @@ final class OverlayPanel: NSPanel {
         baseY = visibleFrame.minY > screenFrame.minY
             ? visibleFrame.minY + 8
             : screenFrame.minY + 12
+
+        if isShowingAnswer {
+            // Re-center the card at new baseCenterX, keep its current size
+            let w = frame.width
+            let h = frame.height
+            setFrame(NSRect(x: baseCenterX - w / 2, y: baseY, width: w, height: h), display: true)
+            return
+        }
 
         let w = frame.width > kIdleW ? kActiveW : kIdleW
         let h = frame.height > kIdleH ? kActiveH : kIdleH
