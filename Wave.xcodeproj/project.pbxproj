@@ -391,8 +391,8 @@
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Wave needs microphone access to record speech for transcription.";
 				INFOPLIST_KEY_SUAutomaticallyUpdate = YES;
 				INFOPLIST_KEY_SUEnableAutomaticChecks = YES;
-				INFOPLIST_KEY_SUFeedURL = "https://cdn.monawwar.io/wave/paid/appcast.xml";
-				INFOPLIST_KEY_SUPublicEDKey = "q/IKtcptxzOnPkRIfmwXYt9vUFnqqHa363M2H3VoZ20=";
+				INFOPLIST_KEY_SUFeedURL = "https://mxvsh.github.io/wave/appcast.xml";
+				INFOPLIST_KEY_SUPublicEDKey = "K0yJPvXnOPfoG18bP57X24M05PnY70jlj6NqK76CikE=";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -436,8 +436,8 @@
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Wave needs microphone access to record speech for transcription.";
 				INFOPLIST_KEY_SUAutomaticallyUpdate = YES;
 				INFOPLIST_KEY_SUEnableAutomaticChecks = YES;
-				INFOPLIST_KEY_SUFeedURL = "https://cdn.monawwar.io/wave/paid/appcast.xml";
-				INFOPLIST_KEY_SUPublicEDKey = "q/IKtcptxzOnPkRIfmwXYt9vUFnqqHa363M2H3VoZ20=";
+				INFOPLIST_KEY_SUFeedURL = "https://mxvsh.github.io/wave/appcast.xml";
+				INFOPLIST_KEY_SUPublicEDKey = "K0yJPvXnOPfoG18bP57X24M05PnY70jlj6NqK76CikE=";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
