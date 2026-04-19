@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.0](https://github.com/mxvsh/wave/compare/v0.3.8...v0.4.0) (2026-04-19)
+
+### Features
+
+* implement answer card ([2f1d330](https://github.com/mxvsh/wave/commit/2f1d330d5a017b80c6e16c71e13c2cf0156ec03c))
+
 ## [0.3.8](https://github.com/mxvsh/wave/compare/v0.3.7...v0.3.8) (2026-04-04)
 
 ## [0.3.7](https://github.com/mxvsh/wave/compare/v0.3.6...v0.3.7) (2026-04-04)
