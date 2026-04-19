@@ -4,12 +4,12 @@
         <title>Wave</title>
         <item>
             <title>0.4.0</title>
-            <pubDate>Sun, 19 Apr 2026 09:57:11 +0000</pubDate>
+            <pubDate>Sun, 19 Apr 2026 10:14:31 +0000</pubDate>
             <link>https://github.com/mxvsh/wave</link>
             <sparkle:version>2</sparkle:version>
             <sparkle:shortVersionString>0.4.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/mxvsh/wave/releases/download/v0.4.0/Wave-Installer-v0.4.0.dmg" length="3447539" type="application/octet-stream"/>
+            <enclosure url="https://github.com/mxvsh/wave/releases/download/v0.4.0/Wave-Installer-v0.4.0.dmg" length="3447504" type="application/octet-stream"/>
         </item>
     </channel>
 </rss>
