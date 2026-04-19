@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.2](https://github.com/mxvsh/wave/compare/v0.4.1...v0.4.2) (2026-04-19)
+
+### Bug Fixes
+
+* move Sparkle SUFeedURL and SUPublicEDKey into Info.plist ([132bad4](https://github.com/mxvsh/wave/commit/132bad46c6ab74cca960bb49806ccbade686f113))
+
 ## [0.4.1](https://github.com/mxvsh/wave/compare/v0.4.0...v0.4.1) (2026-04-19)
 
 ### Bug Fixes
