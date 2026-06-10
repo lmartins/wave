@@ -46,9 +46,9 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		3CA5A7912F5063F600DBB766 /* wave */ = {
+		3CA5A7912F5063F600DBB766 /* Wave */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = wave;
+			path = Wave;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */

@@ -18,6 +18,8 @@ struct GeneralSettingsView: View {
                         .font(.system(size: 13))
                     Toggle("Hide pill when idle", isOn: $state.hideIdlePill)
                         .font(.system(size: 13))
+                    Toggle("Show in Dock", isOn: $state.showInDock)
+                        .font(.system(size: 13))
                     Picker("Language", selection: $state.transcriptionLanguage) {
                         ForEach(Self.languages, id: \.code) { lang in
                             Text(lang.label).tag(lang.code)

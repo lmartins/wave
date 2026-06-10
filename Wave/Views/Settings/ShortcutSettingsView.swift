@@ -16,6 +16,12 @@ struct ShortcutSettingsView: View {
                     .labelsHidden()
                     .pickerStyle(.segmented)
                     .onChange(of: appState.dictationMode) { appState.setupHotkey() }
+
+                    Text(appState.dictationMode == .toggle
+                         ? "Press the dictation shortcut once to start, again to stop."
+                         : "Hold the dictation shortcut to record, release to transcribe.")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
                 }
 
                 section("Shortcuts") {
@@ -25,6 +31,14 @@ struct ShortcutSettingsView: View {
 
                     shortcutRow("AI Mode", keyCode: $state.aiModeKeyCode, modifiers: $state.aiModeModifiers) { isRecording in
                         if isRecording { appState.aiHotkeyService.stop() } else { appState.aiHotkeyService.start() }
+                    } onChange: { appState.setupHotkey() }
+
+                    shortcutRow("Dismiss", keyCode: $state.cancelHotkeyKeyCode, modifiers: $state.cancelHotkeyModifiers) { isRecording in
+                        if isRecording { appState.cancelHotkeyService.stop() } else { appState.cancelHotkeyService.start() }
+                    } onChange: { appState.setupHotkey() }
+
+                    shortcutRow("Paste Last", keyCode: $state.pasteLastHotkeyKeyCode, modifiers: $state.pasteLastHotkeyModifiers) { isRecording in
+                        if isRecording { appState.pasteLastHotkeyService.stop() } else { appState.pasteLastHotkeyService.start() }
                     } onChange: { appState.setupHotkey() }
                 }
             }

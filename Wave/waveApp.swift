@@ -106,6 +106,8 @@ struct WaveApp: App {
             window.title == "Wave" || window.identifier?.rawValue.contains("main") == true
         }
 
+        NSApp.setActivationPolicy(.regular)
+
         if let window = existing {
             if window.isMiniaturized { window.deminiaturize(nil) }
             window.makeKeyAndOrderFront(nil)
@@ -118,9 +120,11 @@ struct WaveApp: App {
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    func applicationDidFinishLaunching(_ notification: Notification) {
-        guard enforceSingleInstance() else { return }
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        enforceSingleInstance()
+    }
 
+    func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
         Task { @MainActor in
             UpdaterService.shared.start()
@@ -143,21 +147,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         false
     }
 
-    @discardableResult
-    private func enforceSingleInstance() -> Bool {
-        guard let bundleID = Bundle.main.bundleIdentifier else { return true }
+    private func enforceSingleInstance() {
+        #if DEBUG
+        return
+        #endif
 
-        let running = NSRunningApplication.runningApplications(withBundleIdentifier: bundleID)
-        guard running.count > 1 else { return true }
+        guard let bundleID = Bundle.main.bundleIdentifier,
+              !bundleID.hasSuffix(".debug") else { return }
 
         let currentPID = ProcessInfo.processInfo.processIdentifier
-        if let existing = running.first(where: { $0.processIdentifier != currentPID }) {
-            existing.activate(options: [.activateAllWindows])
-        }
+        let others = NSRunningApplication.runningApplications(withBundleIdentifier: bundleID)
+            .filter { $0.processIdentifier != currentPID }
+        guard let existing = others.first else { return }
 
         DispatchQueue.main.async {
-            NSApp.terminate(nil)
+            existing.activate(options: [.activateAllWindows])
+            exit(0)
         }
-        return false
     }
 }

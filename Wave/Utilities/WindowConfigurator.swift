@@ -5,12 +5,12 @@ extension Color {
     static let brand = Color(red: 0x7B / 255, green: 0x6E / 255, blue: 0xF6 / 255)
 }
 
-// Configures the NSWindow: transparent titlebar, traffic lights, no title text,
-// draggable by background, and handles close-to-hide + activation policy.
 final class WaveWindowDelegate: NSObject, NSWindowDelegate {
+    var onWindowClosed: (() -> Void)?
+
     func windowShouldClose(_ sender: NSWindow) -> Bool {
         sender.orderOut(nil)
-        NSApp.setActivationPolicy(.accessory)
+        onWindowClosed?()
         return false
     }
 }
@@ -25,9 +25,22 @@ final class ConfiguratorNSView: NSView {
         window.isMovableByWindowBackground = true
         window.delegate = windowDelegate
     }
+
+    func setOnWindowClosed(_ handler: (() -> Void)?) {
+        windowDelegate.onWindowClosed = handler
+    }
 }
 
 struct WindowConfigurator: NSViewRepresentable {
-    func makeNSView(context: Context) -> ConfiguratorNSView { ConfiguratorNSView() }
-    func updateNSView(_ nsView: ConfiguratorNSView, context: Context) {}
+    var onWindowClosed: () -> Void
+
+    func makeNSView(context: Context) -> ConfiguratorNSView {
+        let view = ConfiguratorNSView()
+        view.setOnWindowClosed(onWindowClosed)
+        return view
+    }
+
+    func updateNSView(_ nsView: ConfiguratorNSView, context: Context) {
+        nsView.setOnWindowClosed(onWindowClosed)
+    }
 }
