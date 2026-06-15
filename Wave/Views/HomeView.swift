@@ -76,7 +76,7 @@ struct HomeView: View {
         .toolbarBackground(.hidden, for: .windowToolbar)
         .accentColor(.brand)
         .frame(minWidth: 520, maxWidth: 520, minHeight: 500, maxHeight: 500)
-        .background(WindowConfigurator().frame(width: 0, height: 0))
+        .background(WindowConfigurator(onWindowClosed: { appState.updateDockVisibility() }).frame(width: 0, height: 0))
         .sheet(isPresented: Binding(
             get: { appState.showOnboarding },
             set: { appState.showOnboarding = $0 }

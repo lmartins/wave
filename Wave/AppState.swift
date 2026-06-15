@@ -57,6 +57,12 @@ final class AppState {
             if hideIdlePill { overlayPanel?.orderOut(nil) } else { startPersistentOverlay() }
         }
     }
+    var showInDock: Bool {
+        didSet {
+            UserDefaults.standard.set(showInDock, forKey: "showInDock")
+            updateDockVisibility()
+        }
+    }
     var customVocabulary: [String] {
         didSet { UserDefaults.standard.set(customVocabulary, forKey: "customVocabulary") }
     }
@@ -121,6 +127,18 @@ final class AppState {
     var aiModeModifiers: UInt64 {
         didSet { UserDefaults.standard.set(aiModeModifiers, forKey: "aiModeModifiers") }
     }
+    var cancelHotkeyKeyCode: UInt16 {
+        didSet { UserDefaults.standard.set(Int(cancelHotkeyKeyCode), forKey: "cancelHotkeyKeyCode") }
+    }
+    var cancelHotkeyModifiers: UInt64 {
+        didSet { UserDefaults.standard.set(cancelHotkeyModifiers, forKey: "cancelHotkeyModifiers") }
+    }
+    var pasteLastHotkeyKeyCode: UInt16 {
+        didSet { UserDefaults.standard.set(Int(pasteLastHotkeyKeyCode), forKey: "pasteLastHotkeyKeyCode") }
+    }
+    var pasteLastHotkeyModifiers: UInt64 {
+        didSet { UserDefaults.standard.set(pasteLastHotkeyModifiers, forKey: "pasteLastHotkeyModifiers") }
+    }
     var aiModel: String {
         didSet { UserDefaults.standard.set(aiModel, forKey: "aiModel") }
     }
@@ -130,6 +148,8 @@ final class AppState {
     let transcriptionService = TranscriptionService()
     let hotkeyService = HotkeyService()
     let aiHotkeyService = HotkeyService()
+    let cancelHotkeyService = HotkeyService()
+    let pasteLastHotkeyService = HotkeyService()
     let historyManager = HistoryManager()
     let snippetManager = SnippetManager()
     let microphoneManager = MicrophoneManager()
@@ -167,6 +187,20 @@ final class AppState {
         )
     }
 
+    var cancelShortcutDisplayString: String {
+        KeyCodeMapping.displayString(
+            keyCode: cancelHotkeyKeyCode,
+            modifiers: CGEventFlags(rawValue: cancelHotkeyModifiers)
+        )
+    }
+
+    var pasteLastShortcutDisplayString: String {
+        KeyCodeMapping.displayString(
+            keyCode: pasteLastHotkeyKeyCode,
+            modifiers: CGEventFlags(rawValue: pasteLastHotkeyModifiers)
+        )
+    }
+
     init() {
         isOnboardingComplete = UserDefaults.standard.bool(forKey: "isOnboardingComplete")
         dictationMode = DictationMode(rawValue: UserDefaults.standard.string(forKey: "dictationMode") ?? "") ?? .pushToTalk
@@ -179,6 +213,7 @@ final class AppState {
         }
         muteSystemAudio = UserDefaults.standard.bool(forKey: "muteSystemAudio")
         hideIdlePill = UserDefaults.standard.bool(forKey: "hideIdlePill")
+        showInDock = UserDefaults.standard.bool(forKey: "showInDock")
         customVocabulary = UserDefaults.standard.stringArray(forKey: "customVocabulary") ?? []
         transcriptionProvider = TranscriptionProvider(rawValue: UserDefaults.standard.string(forKey: "transcriptionProvider") ?? "") ?? .local
         groqAPIKey = UserDefaults.standard.string(forKey: "groqAPIKey") ?? ""
@@ -187,6 +222,10 @@ final class AppState {
         selectedMicUID = UserDefaults.standard.string(forKey: "selectedMicUID") ?? ""
         aiModeKeyCode = UInt16(UserDefaults.standard.integer(forKey: "aiModeKeyCode"))
         aiModeModifiers = UInt64(UserDefaults.standard.integer(forKey: "aiModeModifiers"))
+        cancelHotkeyKeyCode = UInt16(UserDefaults.standard.integer(forKey: "cancelHotkeyKeyCode"))
+        cancelHotkeyModifiers = UInt64(UserDefaults.standard.integer(forKey: "cancelHotkeyModifiers"))
+        pasteLastHotkeyKeyCode = UInt16(UserDefaults.standard.integer(forKey: "pasteLastHotkeyKeyCode"))
+        pasteLastHotkeyModifiers = UInt64(UserDefaults.standard.integer(forKey: "pasteLastHotkeyModifiers"))
         aiModel = UserDefaults.standard.string(forKey: "aiModel") ?? "openai/gpt-oss-20b"
         groqFetchedModels = UserDefaults.standard.stringArray(forKey: "groqFetchedModels") ?? []
         whisperPrompt = UserDefaults.standard.string(forKey: "whisperPrompt") ?? ""
@@ -224,6 +263,18 @@ final class AppState {
             #endif
         }
 
+        // Default dismiss shortcut: Control + Option + Esc
+        if cancelHotkeyKeyCode == 0 && cancelHotkeyModifiers == 0 {
+            cancelHotkeyKeyCode = 53 // kVK_Escape
+            cancelHotkeyModifiers = CGEventFlags.maskControl.rawValue | CGEventFlags.maskAlternate.rawValue
+        }
+
+        // Default paste-last shortcut: Control + Option + V
+        if pasteLastHotkeyKeyCode == 0 && pasteLastHotkeyModifiers == 0 {
+            pasteLastHotkeyKeyCode = 9 // kVK_ANSI_V
+            pasteLastHotkeyModifiers = CGEventFlags.maskControl.rawValue | CGEventFlags.maskAlternate.rawValue
+        }
+
         if !isOnboardingComplete {
             showOnboarding = true
         }
@@ -248,6 +299,8 @@ final class AppState {
                 DispatchQueue.main.async {
                     self.hotkeyService.stop()
                     self.aiHotkeyService.stop()
+                    self.cancelHotkeyService.stop()
+                    self.pasteLastHotkeyService.stop()
                     self.setupHotkey()
                 }
             }
@@ -256,9 +309,17 @@ final class AppState {
     }
 
     func setupHotkey() {
+        hotkeyService.stop()
+        aiHotkeyService.stop()
+        cancelHotkeyService.stop()
+        pasteLastHotkeyService.stop()
+
+        let isToggleMode = dictationMode == .toggle
+
         // Normal dictation hotkey
         hotkeyService.targetKeyCode = CGKeyCode(hotkeyKeyCode)
         hotkeyService.targetModifiers = CGEventFlags(rawValue: hotkeyModifiers)
+        hotkeyService.isToggleMode = isToggleMode
 
         hotkeyService.onKeyDown = { [weak self] in
             DispatchQueue.main.async {
@@ -295,6 +356,7 @@ final class AppState {
         // AI mode hotkey
         aiHotkeyService.targetKeyCode = CGKeyCode(aiModeKeyCode)
         aiHotkeyService.targetModifiers = CGEventFlags(rawValue: aiModeModifiers)
+        aiHotkeyService.isToggleMode = isToggleMode
 
         aiHotkeyService.onKeyDown = { [weak self] in
             DispatchQueue.main.async {
@@ -332,6 +394,32 @@ final class AppState {
 
         aiHotkeyService.start()
 
+        // Dismiss current prompt hotkey
+        cancelHotkeyService.targetKeyCode = CGKeyCode(cancelHotkeyKeyCode)
+        cancelHotkeyService.targetModifiers = CGEventFlags(rawValue: cancelHotkeyModifiers)
+
+        cancelHotkeyService.onKeyDown = { [weak self] in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                Task { await self.dismissVoicePrompt() }
+            }
+        }
+
+        cancelHotkeyService.start()
+
+        // Paste last transcription hotkey
+        pasteLastHotkeyService.targetKeyCode = CGKeyCode(pasteLastHotkeyKeyCode)
+        pasteLastHotkeyService.targetModifiers = CGEventFlags(rawValue: pasteLastHotkeyModifiers)
+
+        pasteLastHotkeyService.onKeyDown = { [weak self] in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                self.pasteLastTranscription()
+            }
+        }
+
+        pasteLastHotkeyService.start()
+
         overlayPanel?.setShortcutLabel(shortcutDisplayString)
         setupPillPressAndHold()
     }
@@ -340,17 +428,38 @@ final class AppState {
         overlayPanel?.onMouseDown = { [weak self] in
             guard let self else { return }
             self.isAIMode = false
-            if self.status == .idle {
-                self.isKeyHeld = true
-                Task { await self.startDictation() }
+            switch self.dictationMode {
+            case .pushToTalk:
+                if self.status == .idle {
+                    self.isKeyHeld = true
+                    Task { await self.startDictation() }
+                }
+            case .toggle:
+                if self.status == .idle {
+                    Task { await self.startDictation() }
+                } else if self.status == .recording {
+                    Task { await self.stopDictationAndPaste() }
+                }
             }
         }
         overlayPanel?.onMouseUp = { [weak self] in
             guard let self else { return }
-            if self.isKeyHeld && self.status == .recording {
+            if self.dictationMode == .pushToTalk && self.isKeyHeld && self.status == .recording {
                 self.isKeyHeld = false
                 Task { await self.stopDictationAndPaste() }
             }
+        }
+    }
+
+    func updateDockVisibility() {
+        let mainWindow = NSApp.windows.first { window in
+            window.title == "Wave" || window.identifier?.rawValue.contains("main") == true
+        }
+        let windowVisible = mainWindow?.isVisible == true
+        if windowVisible || showInDock {
+            NSApp.setActivationPolicy(.regular)
+        } else {
+            NSApp.setActivationPolicy(.accessory)
         }
     }
 
@@ -390,6 +499,29 @@ final class AppState {
             overlayPanel?.setAIMode(false)
             isAIMode = false
         }
+    }
+
+    func dismissVoicePrompt() async {
+        guard status == .recording || status == .transcribing else { return }
+
+        if status == .recording {
+            await transcriptionService.stopRecordingAndDiscard()
+        }
+        if muteSystemAudio { SystemAudioDucker.restore() }
+
+        status = .idle
+        isKeyHeld = false
+        isAIMode = false
+        selectedContext = nil
+        overlayPanel?.setAIMode(false)
+        overlayPanel?.hideAnswer()
+        hideOverlayIfIdle()
+    }
+
+    func pasteLastTranscription() {
+        guard status == .idle else { return }
+        guard let text = historyManager.records.first?.text else { return }
+        PasteService.paste(text: text)
     }
 
     func stopDictationAndPaste() async {

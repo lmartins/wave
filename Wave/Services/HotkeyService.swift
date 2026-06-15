@@ -5,6 +5,7 @@ import Carbon.HIToolbox
 final class HotkeyService {
     var targetKeyCode: CGKeyCode = CGKeyCode(kVK_Space)
     var targetModifiers: CGEventFlags = .maskControl
+    var isToggleMode = false
     var onKeyDown: (() -> Void)?
     var onKeyUp: (() -> Void)?
 
@@ -13,9 +14,11 @@ final class HotkeyService {
     private var modifierShortcutIsPressed = false
     // Tracks which specific modifier keyCodes are currently held (distinguishes L vs R keys)
     private var heldModifierKeyCodes: Set<CGKeyCode> = []
+    private var previousModifierFlags: CGEventFlags = []
 
     func start() {
         modifierShortcutIsPressed = false
+        previousModifierFlags = []
         let eventMask: CGEventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue) | (1 << CGEventType.flagsChanged.rawValue)
 
         let callback: CGEventTapCallBack = { proxy, type, event, refcon in
@@ -47,6 +50,7 @@ final class HotkeyService {
     func stop() {
         modifierShortcutIsPressed = false
         heldModifierKeyCodes.removeAll()
+        previousModifierFlags = []
         if let tap = eventTap {
             CGEvent.tapEnable(tap: tap, enable: false)
             if let source = runLoopSource {
@@ -78,13 +82,13 @@ final class HotkeyService {
                 return Unmanaged.passRetained(event)
             }
 
-            // Track which specific modifier keys are held to distinguish L vs R
-            if currentMods.rawValue > (heldModifierKeyCodes.isEmpty ? 0 : 1) {
+            if currentMods.rawValue > previousModifierFlags.rawValue {
                 heldModifierKeyCodes.insert(keyCode)
-            } else {
+            } else if currentMods.rawValue < previousModifierFlags.rawValue {
                 heldModifierKeyCodes.remove(keyCode)
             }
             if currentMods.isEmpty { heldModifierKeyCodes.removeAll() }
+            previousModifierFlags = currentMods
 
             // Flags must match AND the target key must actually be held
             let isPressed = currentMods == targetMods && !currentMods.isEmpty
@@ -98,7 +102,7 @@ final class HotkeyService {
 
             if !isPressed && modifierShortcutIsPressed {
                 modifierShortcutIsPressed = false
-                onKeyUp?()
+                if !isToggleMode { onKeyUp?() }
                 return nil
             }
 
@@ -110,10 +114,13 @@ final class HotkeyService {
         }
 
         if type == .keyDown {
+            if isToggleMode && event.getIntegerValueField(.keyboardEventAutorepeat) != 0 {
+                return Unmanaged.passRetained(event)
+            }
             onKeyDown?()
-            return nil // suppress the event
+            return nil
         } else if type == .keyUp {
-            onKeyUp?()
+            if !isToggleMode { onKeyUp?() }
             return nil
         }
 

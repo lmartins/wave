@@ -33,6 +33,11 @@ final class TranscriptionService: NSObject, AVAudioRecorderDelegate {
         try await recorder.startRecording(toOutputFile: file, delegate: self)
     }
 
+    func stopRecordingAndDiscard() async {
+        await recorder.stopRecording()
+        recordedFile = nil
+    }
+
     enum RecordingError: LocalizedError {
         case microphonePermissionDenied
         var errorDescription: String? { "Microphone access denied" }
