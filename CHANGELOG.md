@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0](https://github.com/mxvsh/wave/compare/v0.4.2...v0.5.0) (2026-06-15)
+
+### Features
+
+* add dismiss/paste shortcuts, dock setting, and shortcut recorder fixes ([#17](https://github.com/mxvsh/wave/issues/17)) ([6867cec](https://github.com/mxvsh/wave/commit/6867cec9256c2fd4941568df8bcdd890a827376e))
+* add home dashboard with usage stats and activity charts ([#18](https://github.com/mxvsh/wave/issues/18)) ([d864b6f](https://github.com/mxvsh/wave/commit/d864b6f6732d6618cc05ec271a95b750095f4bdc))
+
+### Bug Fixes
+
+* analytics url ([50a7899](https://github.com/mxvsh/wave/commit/50a7899669e5ec0f27fae19e00e0f54c2dba7b0a))
+* domain url ([37a28f8](https://github.com/mxvsh/wave/commit/37a28f8b8fe74dad019bf9de8d5152a2eb164946))
+
 ## [0.4.2](https://github.com/mxvsh/wave/compare/v0.4.1...v0.4.2) (2026-04-19)
 
 ### Bug Fixes
