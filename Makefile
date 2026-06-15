@@ -5,6 +5,8 @@ CONFIGURATION := Release
 DERIVED_DATA := $(CURDIR)/build
 PRODUCTS_DIR := $(DERIVED_DATA)/Build/Products/$(CONFIGURATION)
 APP_BUNDLE := $(PRODUCTS_DIR)/$(APP_NAME).app
+DEBUG_PRODUCTS_DIR := $(DERIVED_DATA)/Build/Products/Debug
+DEBUG_APP_BUNDLE := $(DEBUG_PRODUCTS_DIR)/$(APP_NAME).app
 STAGING_DIR := $(CURDIR)/dmg-staging
 DMG_NAME ?= Wave-Installer
 DMG_PATH := $(CURDIR)/$(DMG_NAME).dmg
@@ -12,7 +14,7 @@ UPDATES_DIR := $(CURDIR)/updates/releases
 APP_ZIP := $(UPDATES_DIR)/$(APP_NAME).zip
 GENERATE_APPCAST := $(shell command -v generate_appcast 2>/dev/null || find "$(HOME)/Library/Developer/Xcode/DerivedData" -type f -name generate_appcast 2>/dev/null | head -n 1)
 
-.PHONY: all build release dmg zip appcast clean clean-dmg
+.PHONY: all build build-debug run run-cli release dmg zip appcast clean clean-dmg
 
 all: build
 
@@ -25,6 +27,23 @@ $(APP_BUNDLE):
 		-configuration "$(CONFIGURATION)" \
 		-derivedDataPath "$(DERIVED_DATA)" \
 		build
+
+## build-debug: build the app with the Debug configuration
+build-debug:
+	xcodebuild \
+		-project "$(PROJECT)" \
+		-scheme "$(SCHEME)" \
+		-configuration Debug \
+		-derivedDataPath "$(DERIVED_DATA)" \
+		build
+
+## run: build (Debug) and launch the app
+run: build-debug
+	open "$(DEBUG_APP_BUNDLE)"
+
+## run-cli: build (Debug) and run the binary in the terminal (logs to stdout, Ctrl+C to quit)
+run-cli: build-debug
+	"$(DEBUG_APP_BUNDLE)/Contents/MacOS/$(APP_NAME)"
 
 dmg: build
 	@command -v create-dmg >/dev/null 2>&1 || { \
