@@ -18,7 +18,7 @@ struct AboutView: View {
                         Text("Source")
                             .font(.system(size: 12))
                         Spacer()
-                        Link("GitHub", destination: URL(string: "https://github.com/AeroWang/Wave")!)
+                        Link("GitHub", destination: URL(string: "https://github.com/mxvsh/wave")!)
                             .font(.system(size: 12))
                     }
                     HStack {
