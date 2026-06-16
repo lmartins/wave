@@ -380,8 +380,8 @@
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Config/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Wave (Debug)";
-				INFOPLIST_KEY_CFBundleName = Wave;
+				INFOPLIST_KEY_CFBundleDisplayName = Loqui;
+				INFOPLIST_KEY_CFBundleName = Loqui;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_LSUIElement = NO;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -426,8 +426,8 @@
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Config/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Wave;
-				INFOPLIST_KEY_CFBundleName = Wave;
+				INFOPLIST_KEY_CFBundleDisplayName = Loqui;
+				INFOPLIST_KEY_CFBundleName = Loqui;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_LSUIElement = NO;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -500,8 +500,8 @@
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Config/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Wave;
-				INFOPLIST_KEY_CFBundleName = Wave;
+				INFOPLIST_KEY_CFBundleDisplayName = Loqui;
+				INFOPLIST_KEY_CFBundleName = Loqui;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_LSUIElement = NO;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
