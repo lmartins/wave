@@ -153,3 +153,8 @@
 * download DMG directly into release-dir for appcast generation ([89e07f5](https://github.com/mxvsh/wave/commit/89e07f5d3bfac9877beb9af9336745da4a76d576))
 
 ## [0.2.1](https://github.com/mxvsh/wave/compare/v0.2.0...v0.2.1) (2026-03-07)
+
+## 2026-06-10 — Deep research: Loqui competitive landscape
+- Created canonical plan at outputs/.plans/loqui-competitive-research.md after user approval and name correction from Locky to Loqui.
+- Audited local Wave codebase as current Loqui baseline and saved notes to outputs/.drafts/loqui-competitive-research-research-local.md.
+- Ran parallel competitor/privacy/opportunity research tracks; outputs saved under outputs/.drafts/loqui-competitive-research-research-T*.md.

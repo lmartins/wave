@@ -1,0 +1,3 @@
+DEVELOPMENT_TEAM = 996Y4MJA7D
+#include "Bundle.xcconfig"
+#include? "Local.xcconfig"

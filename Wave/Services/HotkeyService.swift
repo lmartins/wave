@@ -8,6 +8,7 @@ final class HotkeyService {
     var isToggleMode = false
     var onKeyDown: (() -> Void)?
     var onKeyUp: (() -> Void)?
+    private(set) var isActive = false
 
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
@@ -17,6 +18,7 @@ final class HotkeyService {
     private var previousModifierFlags: CGEventFlags = []
 
     func start() {
+        stop()
         modifierShortcutIsPressed = false
         previousModifierFlags = []
         let eventMask: CGEventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue) | (1 << CGEventType.flagsChanged.rawValue)
@@ -37,7 +39,8 @@ final class HotkeyService {
             callback: callback,
             userInfo: selfPtr
         ) else {
-            print("Failed to create event tap. Check Accessibility permissions.")
+            print("[wave] Failed to create event tap. Check Accessibility permissions.")
+            isActive = false
             return
         }
 
@@ -45,9 +48,11 @@ final class HotkeyService {
         runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
         CFRunLoopAddSource(CFRunLoopGetMain(), runLoopSource, .commonModes)
         CGEvent.tapEnable(tap: tap, enable: true)
+        isActive = true
     }
 
     func stop() {
+        isActive = false
         modifierShortcutIsPressed = false
         heldModifierKeyCodes.removeAll()
         previousModifierFlags = []
@@ -73,9 +78,10 @@ final class HotkeyService {
         let flags = event.flags
 
         let relevantFlags: CGEventFlags = [.maskControl, .maskAlternate, .maskShift, .maskCommand, .maskSecondaryFn]
-        let currentMods = flags.intersection(relevantFlags)
-        let targetMods = targetModifiers.intersection(relevantFlags)
         let isModifierOnlyShortcut = isModifierKey(targetKeyCode)
+        let currentMods = matchingModifiers(flags, keyCode: isModifierOnlyShortcut ? targetKeyCode : 0)
+            .intersection(relevantFlags)
+        let targetMods = targetModifiers.intersection(relevantFlags)
 
         if isModifierOnlyShortcut {
             guard type == .flagsChanged else {
@@ -138,5 +144,19 @@ final class HotkeyService {
         default:
             return false
         }
+    }
+
+    private func matchingModifiers(_ flags: CGEventFlags, keyCode: CGKeyCode) -> CGEventFlags {
+        guard keyCode != 0 else { return flags }
+        var mods = flags
+        switch Int(keyCode) {
+        case kVK_Option, kVK_RightOption: mods.remove(.maskAlternate)
+        case kVK_Command, kVK_RightCommand: mods.remove(.maskCommand)
+        case kVK_Control, kVK_RightControl: mods.remove(.maskControl)
+        case kVK_Shift, kVK_RightShift: mods.remove(.maskShift)
+        case kVK_Function: mods.remove(.maskSecondaryFn)
+        default: break
+        }
+        return mods
     }
 }

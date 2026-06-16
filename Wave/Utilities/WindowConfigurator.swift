@@ -23,6 +23,7 @@ final class ConfiguratorNSView: NSView {
         guard let window else { return }
         window.titleVisibility = .hidden
         window.isMovableByWindowBackground = true
+        window.minSize = NSSize(width: 520, height: 500)
         window.delegate = windowDelegate
     }
 

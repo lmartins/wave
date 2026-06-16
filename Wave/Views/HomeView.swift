@@ -75,7 +75,7 @@ struct HomeView: View {
         .navigationTitle(selection?.rawValue ?? "Home")
         .toolbarBackground(.hidden, for: .windowToolbar)
         .accentColor(.brand)
-        .frame(minWidth: 520, maxWidth: 520, minHeight: 500, maxHeight: 500)
+        .frame(minWidth: 520, minHeight: 500)
         .background(WindowConfigurator(onWindowClosed: { appState.updateDockVisibility() }).frame(width: 0, height: 0))
         .sheet(isPresented: Binding(
             get: { appState.showOnboarding },

@@ -60,6 +60,48 @@ Required repository secrets:
 - `APPLE_TEAM_ID` — Apple Developer Team ID
 - `SPARKLE_PRIVATE_KEY` — Sparkle EdDSA private key for appcast generation
 
+## Direct release channel (Cloudflare + Sparkle)
+
+We also maintain a self-distributed "Direct" channel (Developer ID signed + notarized DMGs, Sparkle updates) hosted entirely on Cloudflare, following the same pattern used for the Ayron app:
+
+- **Artifacts (DMG + appcast.xml)**: published to a Cloudflare R2 bucket (`wave-updates` or equivalent) via `scripts/release/publish-r2.sh`.
+- **Custom domain**: `updates.wave.mxv.sh` (or similar) serves `appcast.xml` and `/downloads/Wave-latest.dmg` (stable name, short cache) + versioned DMGs (long cache).
+- **Feed URL**: `https://updates.wave.mxv.sh/appcast.xml` (see `Config/Info-Direct.plist` and build settings; the public Ed key lives here too).
+- **Landing page** (Astro site at `wave.mxv.sh`, deployed with wrangler): prefers the direct `Wave-latest.dmg`; falls back to GitHub release assets. This is the "site" piece — update `landing/src/data/site.ts` (directDmgUrl / directAppcastUrl) and the DownloadModal as needed. (The Ayron marketing/docs sites were built in their "Verso"/Nextra setups; here we extended the existing Astro landing.)
+
+### Local / manual direct release (modeled directly on Ayron)
+
+1. One-time machine setup (release Mac):
+   - `brew install create-dmg awscli`
+   - Store notary profile: `xcrun notarytool store-credentials "wave-notary" ...`
+   - Developer ID provisioning profile named "Wave Self Distribution" (or adjust `DEVELOPER_ID_PROFILE_NAME`).
+   - Sparkle EdDSA key: run Sparkle's `generate_keys` once; private goes to Keychain, public to the SUPublicEDKey in the Info plist(s).
+   - Copy `scripts/release/wave-release.env.example` → `~/.pi/agent/wave-release.env` (or `$WAVE_RELEASE_ENV`) and fill real R2 creds + endpoint. The bucket + custom domain must be configured in Cloudflare (R2 + DNS for the updates subdomain).
+
+2. Build the DMG (notarizes, staples, signs with Developer ID):
+   ```
+   make release-dmg            # reads version from Info(-Direct).plist
+   make release-dmg 0.5.0 7    # or override
+   ```
+
+3. Generate the signed appcast (rewrites enclosure to stable -latest.dmg):
+   ```
+   make release-appcast
+   ```
+
+4. Publish to R2:
+   ```
+   source scripts/release/load-release-env.sh
+   make publish-r2
+   # or directly: scripts/release/publish-r2.sh
+   ```
+
+Combined target (after sourcing env) and other helpers are in the Makefile. See the scripts themselves (heavily commented, referencing the Ayron equivalents) and `ExportOptions-Direct.plist` + `Config/Info-Direct.plist`.
+
+The old GitHub-pages appcast (mxvsh.github.io) and pure GH release DMG flow can coexist during transition; flip the SUFeedURL and landing primary URL when ready to cut over.
+
+See also: `scripts/release/*.sh`, `Makefile` (release-* targets), Ayron's `scripts/release/` for the reference implementation.
+
 ## Roadmap
 
 - [x] Toggle and Push to Talk recording modes

@@ -142,6 +142,13 @@ final class AppState {
     var aiModel: String {
         didSet { UserDefaults.standard.set(aiModel, forKey: "aiModel") }
     }
+    var snippets: [Snippet] = [] {
+        didSet {
+            if let data = try? JSONEncoder().encode(snippets) {
+                UserDefaults.standard.set(data, forKey: "snippets")
+            }
+        }
+    }
 
     // MARK: - Services
     let modelManager = ModelManager()
@@ -151,7 +158,6 @@ final class AppState {
     let cancelHotkeyService = HotkeyService()
     let pasteLastHotkeyService = HotkeyService()
     let historyManager = HistoryManager()
-    let snippetManager = SnippetManager()
     let microphoneManager = MicrophoneManager()
     var isModelLoaded = false   // tracked by @Observable — TranscriptionService is not
     var isAIMode = false
@@ -235,6 +241,10 @@ final class AppState {
         usageTotalTokens = UserDefaults.standard.integer(forKey: "usageTotalTokens")
         usageTotalTime = UserDefaults.standard.double(forKey: "usageTotalTime")
         usageRequestCount = UserDefaults.standard.integer(forKey: "usageRequestCount")
+        if let data = UserDefaults.standard.data(forKey: "snippets"),
+           let decoded = try? JSONDecoder().decode([Snippet].self, from: data) {
+            snippets = decoded
+        }
 
         // Apply saved mic selection — didSet doesn't fire during init
         if !selectedMicUID.isEmpty {
@@ -289,6 +299,22 @@ final class AppState {
         }
 
         startAccessibilityMonitor()
+    }
+
+    func addSnippet(name: String, value: String) {
+        snippets = snippets + [Snippet(id: UUID(), name: name, value: value)]
+    }
+
+    func updateSnippet(id: UUID, name: String, value: String) {
+        guard let index = snippets.firstIndex(where: { $0.id == id }) else { return }
+        var updated = snippets
+        updated[index].name = name
+        updated[index].value = value
+        snippets = updated
+    }
+
+    func removeSnippet(_ id: UUID) {
+        snippets = snippets.filter { $0.id != id }
     }
 
     private func startAccessibilityMonitor() {
@@ -549,8 +575,8 @@ final class AppState {
         if isAIMode, let query = transcribed, !query.isEmpty, !groqAPIKey.isEmpty {
             print("[wave] sending to AI: '\(query)'")
             var fullPrompt = llmSystemPrompt
-            if !snippetManager.snippets.isEmpty {
-                let snippetLines = snippetManager.snippets.map { "- \($0.name): \($0.value)" }.joined(separator: "\n")
+            if !snippets.isEmpty {
+                let snippetLines = snippets.map { "- \($0.name): \($0.value)" }.joined(separator: "\n")
                 fullPrompt += "\n\nUser snippets (use when relevant):\n\(snippetLines)"
             }
             var userMessage = query

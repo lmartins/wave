@@ -4,6 +4,7 @@
 
 ## User settings
 xcuserdata/
+Config/Local.xcconfig
 
 ## Obj-C/Swift specific
 *.hmap
@@ -35,7 +36,6 @@ build/
 dmg-staging/
 updates
 *.dmg
-scripts
 .env*
 
 # CocoaPods

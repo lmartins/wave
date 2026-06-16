@@ -7,7 +7,7 @@ struct SnippetsPageView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            if appState.snippetManager.snippets.isEmpty {
+            if appState.snippets.isEmpty {
                 Spacer()
                 VStack(spacing: 6) {
                     Image(systemName: "text.quote")
@@ -22,11 +22,11 @@ struct SnippetsPageView: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 0) {
-                        ForEach(appState.snippetManager.snippets) { snippet in
+                        ForEach(appState.snippets) { snippet in
                             SnippetRow(snippet: snippet) {
                                 editingSnippet = snippet
                             } onDelete: {
-                                appState.snippetManager.remove(snippet.id)
+                                appState.removeSnippet(snippet.id)
                             }
                         }
                     }
@@ -49,12 +49,12 @@ struct SnippetsPageView: View {
         }
         .sheet(isPresented: $showAddSheet) {
             SnippetSheet(snippet: nil) { name, value in
-                appState.snippetManager.add(name: name, value: value)
+                appState.addSnippet(name: name, value: value)
             }
         }
         .sheet(item: $editingSnippet) { snippet in
             SnippetSheet(snippet: snippet) { name, value in
-                appState.snippetManager.update(id: snippet.id, name: name, value: value)
+                appState.updateSnippet(id: snippet.id, name: name, value: value)
             }
         }
     }

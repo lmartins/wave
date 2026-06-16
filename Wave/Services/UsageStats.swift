@@ -1,6 +1,6 @@
 import Foundation
 
-struct UsageStats: Codable {
+struct UsageStats: Codable, Equatable {
     var hourGrid: [String: Int] = [:]
     var dailyWords: [String: Int] = [:]
     var totalWords: Int = 0
@@ -33,5 +33,15 @@ struct UsageStats: Codable {
         let dayKey = Self.dayKey(for: date, calendar: calendar)
         dailyWords[dayKey, default: 0] += words
         totalWords += words
+    }
+
+    mutating func mergeTakingMaximums(from other: UsageStats) {
+        for (key, value) in other.hourGrid {
+            hourGrid[key] = max(hourGrid[key] ?? 0, value)
+        }
+        for (key, value) in other.dailyWords {
+            dailyWords[key] = max(dailyWords[key] ?? 0, value)
+        }
+        totalWords = max(max(totalWords, other.totalWords), dailyWords.values.reduce(0, +))
     }
 }

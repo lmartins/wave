@@ -3,16 +3,21 @@ import SwiftUI
 @main
 struct WaveApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @State private var appState = AppState()
+    @State private var appState: AppState
     @Environment(\.openWindow) private var openWindow
+
+    init() {
+        LegacyDataMigration.migrateIfNeeded()
+        _appState = State(initialValue: AppState())
+    }
 
     var body: some Scene {
         Window("Wave", id: "main") {
             HomeView()
                 .environment(appState)
         }
-        .defaultSize(width: 520, height: 440)
-        .windowResizability(.contentSize)
+        .defaultSize(width: 520, height: 500)
+        .windowResizability(.contentMinSize)
         .defaultPosition(.center)
         .commands {
             CommandGroup(replacing: .newItem) {}

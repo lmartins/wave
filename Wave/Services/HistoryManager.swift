@@ -7,7 +7,7 @@ final class HistoryManager {
 
     init() {
         load()
-        backfillUsageFromRecords()
+        reconcileUsageFromRecords()
     }
 
     func add(_ text: String) {
@@ -87,12 +87,17 @@ final class HistoryManager {
         wordsLast7Days.max() ?? 0
     }
 
-    private func backfillUsageFromRecords() {
-        guard usageStats.totalWords == 0, !records.isEmpty else { return }
+    private func reconcileUsageFromRecords() {
+        guard !records.isEmpty else { return }
+        let existing = usageStats
+        var recordStats = UsageStats()
         for record in records {
-            usageStats.record(words: record.wordCount, at: record.date)
+            recordStats.record(words: record.wordCount, at: record.date)
         }
-        saveUsage()
+        usageStats.mergeTakingMaximums(from: recordStats)
+        if usageStats != existing {
+            saveUsage()
+        }
     }
 
     private static func date(fromDayKey key: String) -> Date? {

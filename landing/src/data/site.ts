@@ -10,6 +10,11 @@ export const site = {
   githubUrl: "https://github.com/mxvsh/wave",
   downloadUrl: "#download",
   releaseUrl: "#download",
+  // Direct release channel (Cloudflare R2 + Sparkle) — modeled on the Ayron setup.
+  // XML (appcast) and DMGs live on updates.wave.mxv.sh (R2-backed custom domain).
+  // The stable latest DMG is overwritten on each release with short cache TTL.
+  directDmgUrl: "https://updates.wave.mxv.sh/downloads/Wave-latest.dmg",
+  directAppcastUrl: "https://updates.wave.mxv.sh/appcast.xml",
   navLinks: [
     { href: "#features", label: "Features" },
     { href: "#how-it-works", label: "How it works" },

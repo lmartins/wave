@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    ExportOptions-Direct.plist
+    ──────────────────────────
+    Used by xcodebuild -exportArchive for the Direct/self-distribution builds
+    of Wave (Developer ID + notarized DMG + Sparkle updates hosted on Cloudflare).
+
+    Mirrors the ExportOptions-Direct.plist pattern from the Ayron project.
+
+    We export with "development" then do a manual Developer ID re-sign in
+    build-dmg.sh (the Ayron workaround) because full developer-id export
+    can have issues with certain capabilities/profiles when Apple Sign In
+    or other entitlements are involved.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>method</key>
+    <string>development</string>
+
+    <key>signingStyle</key>
+    <string>automatic</string>
+
+    <key>destination</key>
+    <string>export</string>
+
+    <key>stripSwiftSymbols</key>
+    <true/>
+
+    <key>uploadSymbols</key>
+    <false/>
+</dict>
+</plist>

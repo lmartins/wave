@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>$(INFOPLIST_KEY_CFBundleDisplayName)</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(INFOPLIST_KEY_CFBundleName)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.4.2</string>
+	<key>CFBundleVersion</key>
+	<string>4</string>
+	<key>LSUIElement</key>
+	<false/>
+	<key>LSApplicationCategoryType</key>
+	<string>$(INFOPLIST_KEY_LSApplicationCategoryType)</string>
+	<key>NSAccentColorName</key>
+	<string>AccentColor</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Wave needs microphone access to record speech for transcription.</string>
+	<!-- Sparkle settings for the Direct (Cloudflare-hosted) channel -->
+	<key>SUFeedURL</key>
+	<string>https://updates.wave.mxv.sh/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>K0yJPvXnOPfoG18bP57X24M05PnY70jlj6NqK76CikE=</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUAutomaticallyUpdate</key>
+	<true/>
+</dict>
+</plist>

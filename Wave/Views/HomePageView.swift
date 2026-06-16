@@ -6,65 +6,96 @@ struct HomePageView: View {
     @Environment(AppState.self) private var appState
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                HStack(spacing: 10) {
-                    StatCard(
-                        value: formatWordCount(appState.historyManager.wordsToday),
-                        label: "Today · words"
-                    )
-                    StatCard(
-                        value: formatWordCount(appState.historyManager.wordsThisWeek),
-                        label: "This week · words"
-                    )
-                    StatCard(
-                        value: formatDuration(appState.historyManager.estimatedTimeSavedSeconds),
-                        label: "Time saved · est."
-                    )
-                }
-
-                if appState.historyManager.totalWords > 0 {
-                    section("Activity") {
-                        ActivityHeatmapView(
-                            grid: appState.historyManager.activityHeatmap,
-                            maxValue: appState.historyManager.activityHeatmapMax
-                        )
-                        Text("Darker cells mean more words dictated at that day and hour.")
-                            .font(.system(size: 11))
-                            .foregroundStyle(.tertiary)
-                    }
-
-                    section("This Week") {
-                        WeekBarChartView(
-                            counts: appState.historyManager.wordsLast7Days,
-                            labels: appState.historyManager.wordsLast7DayLabels,
-                            maxValue: appState.historyManager.wordsLast7DaysMax
-                        )
-                    }
-                }
-
-                if appState.historyManager.records.isEmpty {
-                    emptyState
-                } else {
-                    section("Recent") {
-                        LazyVStack(spacing: 0) {
-                            ForEach(appState.historyManager.records.prefix(5)) { record in
-                                TranscriptionRow(record: record) {
-                                    appState.historyManager.remove(record.id)
-                                }
-                            }
-                        }
-                        Text("Right-click for more options")
-                            .font(.system(size: 10))
-                            .foregroundStyle(.quaternary)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.top, 4)
-                    }
-                }
+        GeometryReader { geo in
+            ScrollView {
+                content(useSideBySideCharts: geo.size.width >= 560)
             }
-            .padding(16)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    @ViewBuilder
+    private func content(useSideBySideCharts: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(spacing: 10) {
+                StatCard(
+                    value: formatWordCount(appState.historyManager.wordsToday),
+                    label: "Today · words"
+                )
+                StatCard(
+                    value: formatWordCount(appState.historyManager.wordsThisWeek),
+                    label: "This week · words"
+                )
+                StatCard(
+                    value: formatDuration(appState.historyManager.estimatedTimeSavedSeconds),
+                    label: "Time saved · est."
+                )
+            }
+
+            if appState.historyManager.totalWords > 0 {
+                chartsSection(sideBySide: useSideBySideCharts)
+            }
+
+            if appState.historyManager.records.isEmpty {
+                emptyState
+            } else {
+                section("Recent") {
+                    LazyVStack(spacing: 0) {
+                        ForEach(appState.historyManager.records.prefix(5)) { record in
+                            TranscriptionRow(record: record) {
+                                appState.historyManager.remove(record.id)
+                            }
+                        }
+                    }
+                    Text("Right-click for more options")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.quaternary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.top, 4)
+                }
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+    }
+
+    @ViewBuilder
+    private func chartsSection(sideBySide: Bool) -> some View {
+        if sideBySide {
+            HStack(alignment: .top, spacing: 12) {
+                activitySection
+                    .frame(maxWidth: .infinity)
+                weekSection
+                    .frame(maxWidth: .infinity)
+            }
+        } else {
+            VStack(alignment: .leading, spacing: 20) {
+                activitySection
+                weekSection
+            }
+        }
+    }
+
+    private var activitySection: some View {
+        section("Activity") {
+            ActivityHeatmapView(
+                grid: appState.historyManager.activityHeatmap,
+                maxValue: appState.historyManager.activityHeatmapMax
+            )
+            Text("Darker cells mean more words dictated at that day and hour.")
+                .font(.system(size: 11))
+                .foregroundStyle(.tertiary)
+        }
+    }
+
+    private var weekSection: some View {
+        section("This Week") {
+            WeekBarChartView(
+                counts: appState.historyManager.wordsLast7Days,
+                labels: appState.historyManager.wordsLast7DayLabels,
+                maxValue: appState.historyManager.wordsLast7DaysMax
+            )
+        }
     }
 
     private var emptyState: some View {

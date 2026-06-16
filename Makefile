@@ -14,7 +14,7 @@ UPDATES_DIR := $(CURDIR)/updates/releases
 APP_ZIP := $(UPDATES_DIR)/$(APP_NAME).zip
 GENERATE_APPCAST := $(shell command -v generate_appcast 2>/dev/null || find "$(HOME)/Library/Developer/Xcode/DerivedData" -type f -name generate_appcast 2>/dev/null | head -n 1)
 
-.PHONY: all build build-debug run run-cli release dmg zip appcast clean clean-dmg
+.PHONY: all build build-debug run run-cli release dmg zip appcast clean clean-dmg release-dmg release-appcast release-changelog
 
 all: build
 
@@ -77,8 +77,45 @@ appcast: zip
 	}
 	"$(GENERATE_APPCAST)" "$(UPDATES_DIR)"
 
-release:
-	./scripts/release.sh
+# ── Direct (self-distribution) release channel (modeled on Ayron) ─────────────
+# Builds a Developer ID-signed + notarized DMG, produces a Sparkle appcast,
+# and (after manual env load) publishes DMG + appcast to Cloudflare R2 under
+# a custom updates domain so Sparkle (and the landing page) can consume them.
+#
+# One-time prep per machine:
+#   - Set up R2 bucket + keys (see scripts/release/wave-release.env.example)
+#   - Store notary credentials: xcrun notarytool store-credentials "wave-notary" ...
+#   - Have a "Wave Self Distribution" Developer ID provisioning profile
+#   - EdDSA keys for Sparkle (generate_keys once; public key in Info plist(s))
+#
+# Typical flow:
+#   make release-dmg
+#   make release-appcast
+#   source scripts/release/load-release-env.sh && make publish-r2
+#   # or the combined:
+#   # (after sourcing env) make release
+#
+# The landing (Astro + wrangler) should be updated to offer the direct
+# latest DMG and the site data should reference the stable Cloudflare URLs.
+
+release-dmg:
+	@bash scripts/release/build-dmg.sh $(VERSION) $(BUILD)
+
+release-appcast:
+	@bash scripts/release/update-appcast.sh
+
+# Optional: if/when we add a node script to sync changelog entries into the
+# landing or a docs site (see Ayron's update-website-changelog.mjs).
+release-changelog:
+	@echo "release-changelog: no-op for now (update landing manually or add a script modeled on Ayron). VERSION=$(VERSION) BUILD=$(BUILD)"
+
+publish-r2:
+	@bash scripts/release/publish-r2.sh
+
+release: release-dmg release-appcast
+	@echo "✅  Direct release artefacts ready in build/release/."
+	@echo "   Next: source scripts/release/load-release-env.sh && make publish-r2"
+	@echo "   Then deploy any landing updates that reference the direct DMG."
 
 clean:
 	rm -rf "$(DERIVED_DATA)"
