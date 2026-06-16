@@ -26,6 +26,20 @@ struct WaveApp: App {
             CommandGroup(replacing: .windowSize) {}
             CommandGroup(replacing: .windowArrangement) {}
             CommandGroup(replacing: .help) {}
+            CommandMenu("Navigate") {
+                Button("Command Palette") {
+                    appState.showCommandPalette = true
+                    openMainWindow()
+                }
+                .keyboardShortcut("k", modifiers: [.command])
+
+                Divider()
+
+                Button("Home") { appState.navigate(to: .home); openMainWindow() }
+                Button("Dictionary") { appState.navigate(to: .dictionary); openMainWindow() }
+                Button("Snippets") { appState.navigate(to: .snippets); openMainWindow() }
+                Button("General Settings") { appState.navigate(to: .general); openMainWindow() }
+            }
         }
 
         MenuBarExtra {
@@ -83,7 +97,7 @@ struct WaveApp: App {
             Divider()
 
             Button("Settings...") {
-                appState.pendingNavSelection = .general
+                appState.navigate(to: .general)
                 openMainWindow()
             }
             .keyboardShortcut(",", modifiers: .command)

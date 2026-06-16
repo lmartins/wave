@@ -28,11 +28,12 @@ enum NavItem: String, Hashable {
 
 struct HomeView: View {
     @Environment(AppState.self) private var appState
-    @State private var selection: NavItem? = .home
 
     var body: some View {
+        @Bindable var state = appState
+
         NavigationSplitView {
-            List(selection: $selection) {
+            List(selection: $state.selectedNavItem) {
                 Label("Home", systemImage: NavItem.home.icon).tag(NavItem.home)
                 Label("Dictionary", systemImage: NavItem.dictionary.icon).tag(NavItem.dictionary)
                 Label("Snippets", systemImage: NavItem.snippets.icon).tag(NavItem.snippets)
@@ -59,7 +60,7 @@ struct HomeView: View {
             }
         } detail: {
             Group {
-                switch selection ?? .home {
+                switch appState.selectedNavItem ?? .home {
                 case .home:       HomePageView()
                 case .dictionary: DictionaryEditorView()
                 case .snippets:   SnippetsPageView()
@@ -72,11 +73,15 @@ struct HomeView: View {
             }
             .frame(minWidth: 340)
         }
-        .navigationTitle(selection?.rawValue ?? "Home")
+        .navigationTitle(appState.selectedNavItem?.rawValue ?? "Home")
         .toolbarBackground(.hidden, for: .windowToolbar)
         .accentColor(.brand)
         .frame(minWidth: 520, minHeight: 500)
         .background(WindowConfigurator(onWindowClosed: { appState.updateDockVisibility() }).frame(width: 0, height: 0))
+        .sheet(isPresented: $state.showCommandPalette) {
+            CommandPaletteView()
+                .environment(appState)
+        }
         .sheet(isPresented: Binding(
             get: { appState.showOnboarding },
             set: { appState.showOnboarding = $0 }
@@ -85,8 +90,7 @@ struct HomeView: View {
                 .environment(appState)
         }
         .onChange(of: appState.pendingNavSelection) { _, pending in
-            guard let pending else { return }
-            selection = pending
+            guard pending != nil else { return }
             appState.pendingNavSelection = nil
         }
     }

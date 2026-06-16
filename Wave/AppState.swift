@@ -170,10 +170,23 @@ final class AppState {
         }
     }
 
+    // MARK: - Navigation
+    var selectedNavItem: NavItem? = .home
+    var showCommandPalette = false
+
     // MARK: - Overlay
     var overlayPanel: OverlayPanel?
-    var pendingNavSelection: NavItem? = nil
+    var pendingNavSelection: NavItem? = nil {
+        didSet {
+            if let pendingNavSelection {
+                selectedNavItem = pendingNavSelection
+            }
+        }
+    }
 
+    func navigate(to item: NavItem) {
+        selectedNavItem = item
+    }
 
     // MARK: - Private
     private var isKeyHeld = false
