@@ -395,7 +395,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 0.3.8;
-				PRODUCT_BUNDLE_IDENTIFIER = io.monawwar.wave.debug;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shuttleworks.Loqui;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -439,7 +439,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 0.3.8;
-				PRODUCT_BUNDLE_IDENTIFIER = io.monawwar.wave;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shuttleworks.Loqui;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -474,7 +474,7 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				PRODUCT_BUNDLE_IDENTIFIER = io.monawwar.wave;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shuttleworks.Loqui;
 				PRODUCT_NAME = Wave;
 			};
 			name = Release;
@@ -507,7 +507,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 0.3.8;
-				PRODUCT_BUNDLE_IDENTIFIER = io.monawwar.wave;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shuttleworks.Loqui;
 				PRODUCT_NAME = Wave;
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
