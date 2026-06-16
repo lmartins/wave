@@ -11,6 +11,7 @@ struct CommandPaletteView: View {
             CommandPaletteAction(title: "Home", subtitle: "Dashboard, history, and usage", icon: NavItem.home.icon, destination: .home),
             CommandPaletteAction(title: "Dictionary", subtitle: "Custom vocabulary for transcription", icon: NavItem.dictionary.icon, destination: .dictionary),
             CommandPaletteAction(title: "Snippets", subtitle: "Reusable text snippets for AI mode", icon: NavItem.snippets.icon, destination: .snippets),
+            CommandPaletteAction(title: "Account", subtitle: "Sign in and manage subscription", icon: NavItem.account.icon, destination: .account),
             CommandPaletteAction(title: "General", subtitle: "Language, provider, and behavior", icon: NavItem.general.icon, destination: .general),
             CommandPaletteAction(title: "Shortcuts", subtitle: "Recording and utility hotkeys", icon: NavItem.shortcut.icon, destination: .shortcut),
             CommandPaletteAction(title: "Models", subtitle: "Local and cloud model setup", icon: NavItem.models.icon, destination: .models),

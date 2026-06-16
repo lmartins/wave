@@ -38,6 +38,7 @@ struct WaveApp: App {
                 Button("Home") { appState.navigate(to: .home); openMainWindow() }
                 Button("Dictionary") { appState.navigate(to: .dictionary); openMainWindow() }
                 Button("Snippets") { appState.navigate(to: .snippets); openMainWindow() }
+                Button("Account") { appState.navigate(to: .account); openMainWindow() }
                 Button("General Settings") { appState.navigate(to: .general); openMainWindow() }
             }
         }

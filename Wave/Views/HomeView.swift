@@ -4,6 +4,8 @@ enum NavItem: String, Hashable {
     case home = "Home"
     case dictionary = "Dictionary"
     case snippets = "Snippets"
+    // Account group
+    case account = "Account"
     // Settings group
     case general = "General"
     case shortcut = "Shortcuts"
@@ -17,6 +19,7 @@ enum NavItem: String, Hashable {
         case .home:       return "house"
         case .dictionary: return "character.book.closed"
         case .snippets:   return "text.alignleft"
+        case .account:    return "person.crop.circle"
         case .general:    return "slider.horizontal.3"
         case .shortcut:   return "keyboard"
         case .models:     return "cpu"
@@ -37,6 +40,10 @@ struct HomeView: View {
                 Label("Home", systemImage: NavItem.home.icon).tag(NavItem.home)
                 Label("Dictionary", systemImage: NavItem.dictionary.icon).tag(NavItem.dictionary)
                 Label("Snippets", systemImage: NavItem.snippets.icon).tag(NavItem.snippets)
+
+                Section("Account") {
+                    Label("Account", systemImage: NavItem.account.icon).tag(NavItem.account)
+                }
 
                 Section("Settings") {
                     Label("General", systemImage: NavItem.general.icon).tag(NavItem.general)
@@ -64,6 +71,7 @@ struct HomeView: View {
                 case .home:       HomePageView()
                 case .dictionary: DictionaryEditorView()
                 case .snippets:   SnippetsPageView()
+                case .account:    AccountView()
                 case .general:    GeneralSettingsView()
                 case .shortcut:   ShortcutSettingsView()
                 case .models:     ModelsSettingsView()

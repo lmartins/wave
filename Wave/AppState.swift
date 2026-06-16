@@ -159,9 +159,15 @@ final class AppState {
     let pasteLastHotkeyService = HotkeyService()
     let historyManager = HistoryManager()
     let microphoneManager = MicrophoneManager()
+    let accountService = AccountService()
     var isModelLoaded = false   // tracked by @Observable — TranscriptionService is not
     var isAIMode = false
     var selectedContext: String? = nil
+    var authSession: AuthSession?
+    var subscriptionStatus: SubscriptionStatus = .inactive
+    var isAuthLoading = false
+    var isSubscriptionLoading = false
+    var authError: String?
 
     var isReady: Bool {
         switch transcriptionProvider {
@@ -258,6 +264,7 @@ final class AppState {
            let decoded = try? JSONDecoder().decode([Snippet].self, from: data) {
             snippets = decoded
         }
+        authSession = accountService.loadSession()
 
         // Apply saved mic selection — didSet doesn't fire during init
         if !selectedMicUID.isEmpty {
@@ -308,6 +315,7 @@ final class AppState {
             await loadSelectedModel()
             if !groqAPIKey.isEmpty { await verifyAndFetchGroqModels() }
             setupHotkey()
+            await refreshAccountState()
             await MainActor.run { startPersistentOverlay() }
         }
 
@@ -328,6 +336,102 @@ final class AppState {
 
     func removeSnippet(_ id: UUID) {
         snippets = snippets.filter { $0.id != id }
+    }
+
+    func signIn(email: String, password: String) async {
+        await performAuthRequest {
+            try await accountService.signIn(email: email, password: password)
+        }
+    }
+
+    func signUp(email: String, password: String) async {
+        await performAuthRequest {
+            try await accountService.signUp(email: email, password: password)
+        }
+    }
+
+    func signOut() async {
+        guard let authSession else { return }
+        isAuthLoading = true
+        authError = nil
+        defer { isAuthLoading = false }
+        do {
+            try await accountService.signOut(authSession)
+        } catch {
+            authError = error.localizedDescription
+        }
+        accountService.clearSession()
+        self.authSession = nil
+        subscriptionStatus = .inactive
+    }
+
+    func refreshAccountState() async {
+        guard let session = authSession else { return }
+        do {
+            let currentSession: AuthSession
+            if session.isExpired {
+                currentSession = try await accountService.refresh(session)
+                authSession = currentSession
+                accountService.saveSession(currentSession)
+            } else {
+                currentSession = session
+            }
+            await refreshSubscription(session: currentSession)
+        } catch {
+            authError = error.localizedDescription
+        }
+    }
+
+    func refreshSubscription() async {
+        guard let authSession else { return }
+        await refreshSubscription(session: authSession)
+    }
+
+    func openCheckout() async {
+        guard let authSession else { return }
+        await openAccountURL { try await accountService.createCheckoutURL(session: authSession) }
+    }
+
+    func openBillingPortal() async {
+        guard let authSession else { return }
+        await openAccountURL { try await accountService.createPortalURL(session: authSession) }
+    }
+
+    private func performAuthRequest(_ request: () async throws -> AuthSession) async {
+        isAuthLoading = true
+        authError = nil
+        defer { isAuthLoading = false }
+        do {
+            let session = try await request()
+            authSession = session
+            accountService.saveSession(session)
+            await refreshSubscription(session: session)
+        } catch {
+            authError = error.localizedDescription
+        }
+    }
+
+    private func refreshSubscription(session: AuthSession) async {
+        guard accountService.isConfigured else { return }
+        isSubscriptionLoading = true
+        defer { isSubscriptionLoading = false }
+        do {
+            subscriptionStatus = try await accountService.fetchSubscription(session: session)
+        } catch {
+            authError = error.localizedDescription
+        }
+    }
+
+    private func openAccountURL(_ request: () async throws -> URL) async {
+        isSubscriptionLoading = true
+        authError = nil
+        defer { isSubscriptionLoading = false }
+        do {
+            let url = try await request()
+            NSWorkspace.shared.open(url)
+        } catch {
+            authError = error.localizedDescription
+        }
     }
 
     private func startAccessibilityMonitor() {

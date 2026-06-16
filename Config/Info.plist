@@ -28,6 +28,10 @@
 	<string>AccentColor</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Wave needs microphone access to record speech for transcription.</string>
+	<key>LOQUI_SUPABASE_URL</key>
+	<string>$(LOQUI_SUPABASE_URL)</string>
+	<key>LOQUI_SUPABASE_ANON_KEY</key>
+	<string>$(LOQUI_SUPABASE_ANON_KEY)</string>
 	<key>SUFeedURL</key>
 	<string>https://mxvsh.github.io/wave/appcast.xml</string>
 	<key>SUPublicEDKey</key>

@@ -394,6 +394,8 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				LOQUI_SUPABASE_ANON_KEY = "";
+				LOQUI_SUPABASE_URL = "";
 				MARKETING_VERSION = 0.3.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.shuttleworks.Loqui;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -438,6 +440,8 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				LOQUI_SUPABASE_ANON_KEY = "";
+				LOQUI_SUPABASE_URL = "";
 				MARKETING_VERSION = 0.3.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.shuttleworks.Loqui;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -506,6 +510,8 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				LOQUI_SUPABASE_ANON_KEY = "";
+				LOQUI_SUPABASE_URL = "";
 				MARKETING_VERSION = 0.3.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.shuttleworks.Loqui;
 				PRODUCT_NAME = Wave;
